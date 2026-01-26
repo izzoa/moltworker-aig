@@ -217,11 +217,21 @@ export default {
       await ensureClawdbotGateway(sandbox, env);
     } catch (error) {
       console.error('Failed to start Clawdbot:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Provide helpful hints based on the error and configuration
+      let hint = 'Check worker logs with: wrangler tail';
+      if (!env.ANTHROPIC_API_KEY) {
+        hint = 'ANTHROPIC_API_KEY is not set. Run: wrangler secret put ANTHROPIC_API_KEY';
+      } else if (errorMessage.includes('heap out of memory') || errorMessage.includes('OOM')) {
+        hint = 'Gateway ran out of memory. Try again or check for memory leaks.';
+      }
+      
       return new Response(
         JSON.stringify({
           error: 'Clawdbot gateway failed to start',
-          details: error instanceof Error ? error.message : 'Unknown error',
-          hint: 'Check that ANTHROPIC_API_KEY is set via wrangler secrets',
+          details: errorMessage,
+          hint,
         }),
         {
           status: 503,
