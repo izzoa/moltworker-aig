@@ -224,6 +224,34 @@ npx wrangler secret put SLACK_APP_TOKEN
 npm run deploy
 ```
 
+## Cloudflare AI Gateway
+
+You can route Anthropic API requests through [Cloudflare AI Gateway](https://developers.cloudflare.com/ai-gateway/) for caching, rate limiting, analytics, and cost tracking.
+
+### Setup
+
+1. Create an AI Gateway in the [Cloudflare Dashboard](https://dash.cloudflare.com/) under **AI** → **AI Gateway**
+2. Set the `ANTHROPIC_BASE_URL` secret to your gateway's Anthropic endpoint:
+
+```bash
+npx wrangler secret put ANTHROPIC_BASE_URL
+# Enter: https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic
+```
+
+3. Redeploy:
+
+```bash
+npm run deploy
+```
+
+### Benefits
+
+- **Caching**: Cache identical requests to reduce costs
+- **Rate limiting**: Protect against runaway API costs
+- **Analytics**: Track token usage, costs, and latency
+- **Logging**: Full request/response logging for debugging
+- **BYOK**: Optionally store your Anthropic API key in AI Gateway instead of as a Worker secret
+
 ## All Secrets Reference
 
 | Secret | Required | Description |
