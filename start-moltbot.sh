@@ -1,25 +1,26 @@
 #!/bin/bash
-# Startup script for Clawdbot in Cloudflare Sandbox
+# Startup script for Moltbot in Cloudflare Sandbox
 # This script:
 # 1. Restores config from R2 backup if available
-# 2. Configures clawdbot from environment variables
+# 2. Configures moltbot from environment variables
 # 3. Starts a background sync to backup config to R2
 # 4. Starts the gateway
 
 set -e
 
 # Check if clawdbot gateway is already running - bail early if so
+# Note: CLI is still named "clawdbot" until upstream renames it
 if pgrep -f "clawdbot gateway" > /dev/null 2>&1; then
-    echo "Clawdbot gateway is already running, exiting."
+    echo "Moltbot gateway is already running, exiting."
     exit 0
 fi
 
-# Paths
+# Paths (clawdbot paths are used internally - upstream hasn't renamed yet)
 CONFIG_DIR="/root/.clawdbot"
 CONFIG_FILE="$CONFIG_DIR/clawdbot.json"
 TEMPLATE_DIR="/root/.clawdbot-templates"
-TEMPLATE_FILE="$TEMPLATE_DIR/clawdbot.json.template"
-BACKUP_DIR="/data/clawdbot"
+TEMPLATE_FILE="$TEMPLATE_DIR/moltbot.json.template"
+BACKUP_DIR="/data/moltbot"
 
 echo "Config directory: $CONFIG_DIR"
 echo "Backup directory: $BACKUP_DIR"
@@ -178,7 +179,7 @@ EOFNODE
 # START GATEWAY
 # ============================================================
 # Note: R2 backup sync is handled by the Worker's cron trigger
-echo "Starting Clawdbot Gateway..."
+echo "Starting Moltbot Gateway..."
 echo "Gateway will be available on port 18789"
 
 # Clean up stale lock files

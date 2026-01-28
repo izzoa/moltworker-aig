@@ -1,19 +1,19 @@
 import type { Sandbox } from '@cloudflare/sandbox';
 
 /**
- * Environment bindings for the Clawdbot Worker
+ * Environment bindings for the Moltbot Worker
  */
-export interface ClawdbotEnv {
+export interface MoltbotEnv {
   Sandbox: DurableObjectNamespace<Sandbox>;
   ASSETS: Fetcher; // Assets binding for admin UI static files
-  CLAWDBOT_BUCKET: R2Bucket; // R2 bucket for persistent storage
+  MOLTBOT_BUCKET: R2Bucket; // R2 bucket for persistent storage
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_BASE_URL?: string; // Custom base URL for Anthropic API (e.g., Cloudflare AI Gateway)
   OPENAI_API_KEY?: string;
-  CLAWDBOT_GATEWAY_TOKEN?: string;
+  MOLTBOT_GATEWAY_TOKEN?: string; // Gateway token (mapped to CLAWDBOT_GATEWAY_TOKEN for container)
 
   CLAWDBOT_BIND_MODE?: string;
-  DEV_MODE?: string; // Set to 'true' for local dev (skips CF Access auth + clawdbot device pairing)
+  DEV_MODE?: string; // Set to 'true' for local dev (skips CF Access auth + moltbot device pairing)
   DEBUG_ROUTES?: string; // Set to 'true' to enable /debug/* routes
   SANDBOX_SLEEP_AFTER?: string; // How long before sandbox sleeps: 'never' (default), or duration like '10m', '1h'
   TELEGRAM_BOT_TOKEN?: string;
@@ -47,7 +47,7 @@ export interface AccessUser {
  * Hono app environment type
  */
 export type AppEnv = {
-  Bindings: ClawdbotEnv;
+  Bindings: MoltbotEnv;
   Variables: {
     sandbox: Sandbox;
     accessUser?: AccessUser;

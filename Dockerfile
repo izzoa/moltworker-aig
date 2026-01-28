@@ -14,12 +14,12 @@ RUN apt-get update && apt-get install -y xz-utils ca-certificates rsync \
 # Install pnpm globally
 RUN npm install -g pnpm
 
-# Install clawdbot globally
-RUN npm install -g clawdbot@latest \
+# Install moltbot (CLI is still named clawdbot until upstream renames)
+# Pin to specific version for reproducible builds
+RUN npm install -g clawdbot@2026.1.24-3 \
     && clawdbot --version
 
-# Create clawdbot directories
-# Note: When R2 is mounted, CLAWDBOT_STATE_DIR env var points to the mount path
+# Create moltbot directories (paths still use clawdbot until upstream renames)
 # Templates are stored in /root/.clawdbot-templates for initialization
 RUN mkdir -p /root/.clawdbot \
     && mkdir -p /root/.clawdbot-templates \
@@ -27,12 +27,12 @@ RUN mkdir -p /root/.clawdbot \
     && mkdir -p /root/clawd/skills
 
 # Copy startup script
-# Build cache bust: 2026-01-28-v22-force-rebuild
-COPY start-clawdbot.sh /usr/local/bin/start-clawdbot.sh
-RUN chmod +x /usr/local/bin/start-clawdbot.sh
+# Build cache bust: 2026-01-28-v23-moltbot-rename
+COPY start-moltbot.sh /usr/local/bin/start-moltbot.sh
+RUN chmod +x /usr/local/bin/start-moltbot.sh
 
 # Copy default configuration template
-COPY clawdbot.json.template /root/.clawdbot-templates/clawdbot.json.template
+COPY moltbot.json.template /root/.clawdbot-templates/moltbot.json.template
 
 # Set working directory
 WORKDIR /root/clawd

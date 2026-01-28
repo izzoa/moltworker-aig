@@ -121,6 +121,15 @@
       margin-top: 8px;
     }
     
+    .instructions a {
+      color: rgb(244, 129, 32);
+      text-decoration: none;
+    }
+    
+    .instructions a:hover {
+      text-decoration: underline;
+    }
+    
     .info {
       font-size: 0.8rem;
       color: #707070;
@@ -128,7 +137,7 @@
     }
     
     .info a {
-      color: #60a5fa;
+      color: rgb(244, 129, 32);
       text-decoration: none;
     }
     
@@ -156,15 +165,14 @@
       <h2>How to Fix</h2>
       <p>Set the missing secrets using the Wrangler CLI:</p>
       <pre>wrangler secret put &lt;VARIABLE_NAME&gt;</pre>
-      <p style="margin-top: 16px; margin-bottom: 0;">
+      <p style="margin-top: 16px;">
         For example: <code>wrangler secret put ANTHROPIC_API_KEY</code>
       </p>
+      <p style="margin-bottom: 0;">
+        After setting the secrets, refresh this page to continue.
+        See the <a href="https://github.com/cloudflare/moltworker" target="_blank">README</a> for full setup instructions.
+      </p>
     </div>
-    
-    <p class="info">
-      After setting the secrets, refresh this page to continue.<br>
-      See the <a href="https://github.com/cloudflare/moltworker" target="_blank">README</a> for full setup instructions.
-    </p>
   </div>
 </body>
 </html>
