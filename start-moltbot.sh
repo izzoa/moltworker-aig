@@ -46,7 +46,9 @@ if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ] && [ -n "$R2_A
         echo "R2 bucket already mounted at $R2_MOUNT_PATH"
     else
         echo "Mounting R2 bucket to $R2_MOUNT_PATH..."
-        /usr/local/bin/tigrisfs --endpoint "$R2_ENDPOINT" -f "$R2_BUCKET_NAME" "$R2_MOUNT_PATH" &
+        # tigrisfs args: --endpoint <url> <bucket> <mountpoint>
+        # Runs in background (daemonizes by default, we don't use -f foreground flag)
+        /usr/local/bin/tigrisfs --endpoint "$R2_ENDPOINT" "$R2_BUCKET_NAME" "$R2_MOUNT_PATH" &
         
         # Wait for mount to be ready
         for i in {1..10}; do
