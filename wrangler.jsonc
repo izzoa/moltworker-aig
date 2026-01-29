@@ -70,16 +70,35 @@
   "browser": {
     "binding": "BROWSER",
   },
+  // Deploy to Cloudflare button configuration
+  "deploy": {
+    "secret_text": {
+      "AI_GATEWAY_API_KEY": {
+        "description": "AI Gateway auth key (for cf-aig-authorization header). Get this from your [AI Gateway dashboard](https://dash.cloudflare.com/?to=/:account/ai/ai-gateway/).",
+      },
+      "AI_GATEWAY_BASE_URL": {
+        "description": "AI Gateway compat endpoint URL (e.g., https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat). Find this in your [AI Gateway dashboard](https://dash.cloudflare.com/?to=/:account/ai/ai-gateway/).",
+      },
+      "AI_GATEWAY_PROVIDER_API_KEY": {
+        "description": "Provider API key (e.g., your [Anthropic API key](https://console.anthropic.com/)). Used for the Authorization header to the underlying provider.",
+      },
+      "AI_GATEWAY_CUSTOM_PROVIDER": {
+        "description": "Custom provider name from your AI Gateway dashboard (e.g., 'cliproxyapi-anthropic'). This is the name you gave your custom provider.",
+      },
+      "MOLTBOT_GATEWAY_TOKEN": {
+        "description": "Token to protect gateway access. Random string, you can generate one with `openssl rand -base64 32`, for example.",
+      },
+    },
+  },
   // Note: CF_ACCOUNT_ID should be set via `wrangler secret put CF_ACCOUNT_ID`
   // Secrets to configure via `wrangler secret put`:
-  // - ANTHROPIC_API_KEY: Your Anthropic API key
+  // - ANTHROPIC_API_KEY: Your Anthropic API key (fallback if not using AI Gateway)
   // - CF_ACCESS_TEAM_DOMAIN: Cloudflare Access team domain
   // - CF_ACCESS_AUD: Cloudflare Access application audience
   // - TELEGRAM_BOT_TOKEN: (optional) Telegram bot token
   // - DISCORD_BOT_TOKEN: (optional) Discord bot token
   // - SLACK_BOT_TOKEN: (optional) Slack bot token
   // - SLACK_APP_TOKEN: (optional) Slack app token
-  // - MOLTBOT_GATEWAY_TOKEN: (optional) Token to protect gateway access, if unset device pairing will be used
   // - CDP_SECRET: (optional) Shared secret for /cdp endpoint authentication
   //
   // R2 persistent storage secrets (required for data persistence across sessions):
