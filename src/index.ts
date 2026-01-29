@@ -68,9 +68,14 @@ function validateRequiredEnv(env: MoltbotEnv): string[] {
   }
 
   // Check for AI Gateway or direct Anthropic configuration
-  const isCompatGateway = env.AI_GATEWAY_BASE_URL?.endsWith('/compat');
+  // Normalize URL for /compat detection (handle trailing slashes)
+  const normalizedUrl = env.AI_GATEWAY_BASE_URL?.replace(/\/+$/, '') || '';
+  const isCompatGateway = normalizedUrl.endsWith('/compat');
   if (isCompatGateway) {
-    // Custom provider mode requires provider API key and custom provider name
+    // Custom provider mode requires gateway key, provider API key, and custom provider name
+    if (!env.AI_GATEWAY_API_KEY) {
+      missing.push('AI_GATEWAY_API_KEY (required for custom provider /compat mode - used for cf-aig-authorization header)');
+    }
     if (!env.AI_GATEWAY_PROVIDER_API_KEY) {
       missing.push('AI_GATEWAY_PROVIDER_API_KEY (required for custom provider /compat mode)');
     }

@@ -81,6 +81,31 @@ describe('buildEnvVars', () => {
     expect(result.AI_GATEWAY_CUSTOM_PROVIDER).toBeUndefined();
   });
 
+  it('handles compat gateway URL with trailing slash', () => {
+    const env = createMockEnv({
+      AI_GATEWAY_API_KEY: 'gateway-auth-key',
+      AI_GATEWAY_PROVIDER_API_KEY: 'provider-api-key',
+      AI_GATEWAY_CUSTOM_PROVIDER: 'cliproxyapi-anthropic',
+      AI_GATEWAY_BASE_URL: 'https://gateway.ai.cloudflare.com/v1/123/my-gw/compat/',
+    });
+    const result = buildEnvVars(env);
+    // Should still detect as compat mode despite trailing slash
+    expect(result.OPENAI_API_KEY).toBe('provider-api-key');
+    expect(result.CF_AIG_AUTHORIZATION).toBe('gateway-auth-key');
+    expect(result.AI_GATEWAY_CUSTOM_PROVIDER).toBe('cliproxyapi-anthropic');
+  });
+
+  it('handles openai gateway URL with trailing slash', () => {
+    const env = createMockEnv({
+      AI_GATEWAY_API_KEY: 'sk-gateway-key',
+      AI_GATEWAY_BASE_URL: 'https://gateway.ai.cloudflare.com/v1/123/my-gw/openai/',
+    });
+    const result = buildEnvVars(env);
+    // Should still detect as OpenAI mode despite trailing slash
+    expect(result.OPENAI_API_KEY).toBe('sk-gateway-key');
+    expect(result.OPENAI_BASE_URL).toBe('https://gateway.ai.cloudflare.com/v1/123/my-gw/openai/');
+  });
+
   it('passes AI_GATEWAY_BASE_URL directly', () => {
     const env = createMockEnv({
       AI_GATEWAY_BASE_URL: 'https://gateway.ai.cloudflare.com/v1/123/my-gw/anthropic',

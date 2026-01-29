@@ -214,8 +214,10 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/openai
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat (custom provider)
 const baseUrl = process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '';
-const isCompat = baseUrl.endsWith('/compat');
-const isOpenAI = baseUrl.endsWith('/openai');
+// Normalize URL for suffix detection (handle trailing slashes)
+const normalizedUrl = baseUrl.replace(/\/+$/, '');
+const isCompat = normalizedUrl.endsWith('/compat');
+const isOpenAI = normalizedUrl.endsWith('/openai');
 const customProvider = process.env.AI_GATEWAY_CUSTOM_PROVIDER || '';
 
 if (isCompat && customProvider) {

@@ -9,8 +9,10 @@ import type { MoltbotEnv } from '../types';
 export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   const envVars: Record<string, string> = {};
 
-  const isCompatGateway = env.AI_GATEWAY_BASE_URL?.endsWith('/compat');
-  const isOpenAIGateway = env.AI_GATEWAY_BASE_URL?.endsWith('/openai');
+  // Normalize URL for suffix detection (handle trailing slashes)
+  const normalizedUrl = env.AI_GATEWAY_BASE_URL?.replace(/\/+$/, '') || '';
+  const isCompatGateway = normalizedUrl.endsWith('/compat');
+  const isOpenAIGateway = normalizedUrl.endsWith('/openai');
 
   // AI Gateway vars take precedence
   // Map to the appropriate provider env var based on the gateway endpoint

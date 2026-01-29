@@ -383,8 +383,8 @@ Models will be named using the pattern `custom-{provider_name}/{model_id}` (e.g.
 |--------|----------|-------------|
 | `AI_GATEWAY_API_KEY` | Yes* | API key for your AI Gateway provider (or gateway auth key for custom provider mode) |
 | `AI_GATEWAY_BASE_URL` | Yes* | AI Gateway endpoint URL (use `/compat` suffix for custom provider mode) |
-| `AI_GATEWAY_PROVIDER_API_KEY` | No | Provider API key for custom provider mode (Authorization header) |
-| `AI_GATEWAY_CUSTOM_PROVIDER` | No | Custom provider name for compat mode (e.g., "cliproxyapi-anthropic") |
+| `AI_GATEWAY_PROVIDER_API_KEY` | Yes** | Provider API key for custom provider mode (Authorization header) |
+| `AI_GATEWAY_CUSTOM_PROVIDER` | Yes** | Custom provider name for compat mode (e.g., "cliproxyapi-anthropic") |
 | `ANTHROPIC_API_KEY` | Yes* | Direct Anthropic API key (fallback if AI Gateway not configured) |
 | `ANTHROPIC_BASE_URL` | No | Direct Anthropic API base URL (fallback) |
 | `OPENAI_API_KEY` | No | OpenAI API key (alternative provider) |
@@ -405,6 +405,10 @@ Models will be named using the pattern `custom-{provider_name}/{model_id}` (e.g.
 | `SLACK_APP_TOKEN` | No | Slack app token |
 | `CDP_SECRET` | No | Shared secret for CDP endpoint authentication (see [Browser Automation](#optional-browser-automation-cdp)) |
 | `WORKER_URL` | No | Public URL of the worker (required for CDP) |
+
+_* At least one AI provider configuration is required: either `AI_GATEWAY_*` vars for AI Gateway, or `ANTHROPIC_API_KEY` for direct access._
+
+_** Required when using custom provider mode (`AI_GATEWAY_BASE_URL` ending in `/compat`)._
 
 ## Security Considerations
 
