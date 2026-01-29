@@ -263,10 +263,22 @@ app.all('*', async (c) => {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
     let hint = 'Check worker logs with: wrangler tail';
-    if (!c.env.ANTHROPIC_API_KEY) {
-      hint = 'ANTHROPIC_API_KEY is not set. Run: wrangler secret put ANTHROPIC_API_KEY';
-    } else if (errorMessage.includes('heap out of memory') || errorMessage.includes('OOM')) {
+    const normalizedUrl = c.env.AI_GATEWAY_BASE_URL?.replace(/\/+$/, '') || '';
+    const isCompatMode = normalizedUrl.endsWith('/compat');
+
+    if (errorMessage.includes('heap out of memory') || errorMessage.includes('OOM')) {
       hint = 'Gateway ran out of memory. Try again or check for memory leaks.';
+    } else if (isCompatMode) {
+      // Check for custom provider configuration
+      if (!c.env.AI_GATEWAY_PROVIDER_API_KEY) {
+        hint = 'AI_GATEWAY_PROVIDER_API_KEY is not set. Run: wrangler secret put AI_GATEWAY_PROVIDER_API_KEY';
+      } else if (!c.env.AI_GATEWAY_CUSTOM_PROVIDER) {
+        hint = 'AI_GATEWAY_CUSTOM_PROVIDER is not set. Run: wrangler secret put AI_GATEWAY_CUSTOM_PROVIDER';
+      } else if (!c.env.AI_GATEWAY_API_KEY) {
+        hint = 'AI_GATEWAY_API_KEY is not set. Run: wrangler secret put AI_GATEWAY_API_KEY';
+      }
+    } else if (!c.env.ANTHROPIC_API_KEY && !c.env.AI_GATEWAY_API_KEY) {
+      hint = 'No API key configured. Run: wrangler secret put ANTHROPIC_API_KEY (or configure AI Gateway)';
     }
 
     return c.json({
