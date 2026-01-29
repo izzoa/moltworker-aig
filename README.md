@@ -4,7 +4,7 @@ Run [Moltbot](https://molt.bot/) personal AI assistant in a [Cloudflare Sandbox]
 
 > **Experimental:** This is a proof of concept demonstrating that Moltbot can run in Cloudflare Sandbox. It is not officially supported and may break without notice. Use at your own risk.
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/moltworker)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/izzoa/moltworker-aig)
 
 ![moltworker architecture](./assets/logo.png)
 
@@ -355,12 +355,36 @@ npm run deploy
 
 The `AI_GATEWAY_*` variables take precedence over `ANTHROPIC_*` if both are set.
 
+### Custom Provider (Compat Mode)
+
+For advanced use cases, you can use Cloudflare AI Gateway's [Custom Provider](https://developers.cloudflare.com/ai-gateway/providers/custom/) feature via the compat endpoint. This allows routing to custom-configured providers using an OpenAI-compatible API format.
+
+```bash
+# Gateway auth key (for cf-aig-authorization header)
+npx wrangler secret put AI_GATEWAY_API_KEY
+
+# Provider API key (for Authorization header - the underlying provider's key)
+npx wrangler secret put AI_GATEWAY_PROVIDER_API_KEY
+
+# Gateway compat endpoint URL
+npx wrangler secret put AI_GATEWAY_BASE_URL
+# Enter: https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat
+
+# Custom provider name from your gateway dashboard
+npx wrangler secret put AI_GATEWAY_CUSTOM_PROVIDER
+# Enter: cliproxyapi-anthropic (or your custom provider name)
+```
+
+Models will be named using the pattern `custom-{provider_name}/{model_id}` (e.g., `custom-cliproxyapi-anthropic/claude-opus-4-5-20251101`).
+
 ## All Secrets Reference
 
 | Secret | Required | Description |
 |--------|----------|-------------|
-| `AI_GATEWAY_API_KEY` | Yes* | API key for your AI Gateway provider (requires `AI_GATEWAY_BASE_URL`) |
-| `AI_GATEWAY_BASE_URL` | Yes* | AI Gateway endpoint URL (required when using `AI_GATEWAY_API_KEY`) |
+| `AI_GATEWAY_API_KEY` | Yes* | API key for your AI Gateway provider (or gateway auth key for custom provider mode) |
+| `AI_GATEWAY_BASE_URL` | Yes* | AI Gateway endpoint URL (use `/compat` suffix for custom provider mode) |
+| `AI_GATEWAY_PROVIDER_API_KEY` | No | Provider API key for custom provider mode (Authorization header) |
+| `AI_GATEWAY_CUSTOM_PROVIDER` | No | Custom provider name for compat mode (e.g., "cliproxyapi-anthropic") |
 | `ANTHROPIC_API_KEY` | Yes* | Direct Anthropic API key (fallback if AI Gateway not configured) |
 | `ANTHROPIC_BASE_URL` | No | Direct Anthropic API base URL (fallback) |
 | `OPENAI_API_KEY` | No | OpenAI API key (alternative provider) |

@@ -2,18 +2,33 @@ import type { MoltbotEnv } from '../types';
 
 /**
  * Build environment variables to pass to the Moltbot container process
- * 
+ *
  * @param env - Worker environment bindings
  * @returns Environment variables record
  */
 export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   const envVars: Record<string, string> = {};
 
+  const isCompatGateway = env.AI_GATEWAY_BASE_URL?.endsWith('/compat');
   const isOpenAIGateway = env.AI_GATEWAY_BASE_URL?.endsWith('/openai');
 
   // AI Gateway vars take precedence
   // Map to the appropriate provider env var based on the gateway endpoint
-  if (env.AI_GATEWAY_API_KEY) {
+  if (isCompatGateway) {
+    // Custom provider mode using Cloudflare AI Gateway compat endpoint
+    // - AI_GATEWAY_PROVIDER_API_KEY → OPENAI_API_KEY (for Authorization header)
+    // - AI_GATEWAY_API_KEY → CF_AIG_AUTHORIZATION (for cf-aig-authorization header)
+    // - AI_GATEWAY_CUSTOM_PROVIDER → AI_GATEWAY_CUSTOM_PROVIDER (for model prefix)
+    if (env.AI_GATEWAY_PROVIDER_API_KEY) {
+      envVars.OPENAI_API_KEY = env.AI_GATEWAY_PROVIDER_API_KEY;
+    }
+    if (env.AI_GATEWAY_API_KEY) {
+      envVars.CF_AIG_AUTHORIZATION = env.AI_GATEWAY_API_KEY;
+    }
+    if (env.AI_GATEWAY_CUSTOM_PROVIDER) {
+      envVars.AI_GATEWAY_CUSTOM_PROVIDER = env.AI_GATEWAY_CUSTOM_PROVIDER;
+    }
+  } else if (env.AI_GATEWAY_API_KEY) {
     if (isOpenAIGateway) {
       envVars.OPENAI_API_KEY = env.AI_GATEWAY_API_KEY;
     } else {
@@ -33,7 +48,10 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   if (env.AI_GATEWAY_BASE_URL) {
     envVars.AI_GATEWAY_BASE_URL = env.AI_GATEWAY_BASE_URL;
     // Also set the provider-specific base URL env var
-    if (isOpenAIGateway) {
+    if (isCompatGateway) {
+      // For compat mode, use OPENAI_BASE_URL since we use OpenAI-compatible API
+      envVars.OPENAI_BASE_URL = env.AI_GATEWAY_BASE_URL;
+    } else if (isOpenAIGateway) {
       envVars.OPENAI_BASE_URL = env.AI_GATEWAY_BASE_URL;
     } else {
       envVars.ANTHROPIC_BASE_URL = env.AI_GATEWAY_BASE_URL;

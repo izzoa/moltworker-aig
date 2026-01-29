@@ -212,10 +212,52 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 // Usage: Set AI_GATEWAY_BASE_URL or ANTHROPIC_BASE_URL to your endpoint like:
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/openai
+//   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat (custom provider)
 const baseUrl = process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '';
+const isCompat = baseUrl.endsWith('/compat');
 const isOpenAI = baseUrl.endsWith('/openai');
+const customProvider = process.env.AI_GATEWAY_CUSTOM_PROVIDER || '';
 
-if (isOpenAI) {
+if (isCompat && customProvider) {
+    // Custom provider using Cloudflare AI Gateway compat endpoint
+    // Model names: custom-{provider_name}/{model_id}
+    console.log('Configuring custom provider:', customProvider, 'with base URL:', baseUrl);
+    config.models = config.models || {};
+    config.models.providers = config.models.providers || {};
+
+    const providerConfig = {
+        baseUrl: baseUrl,
+        api: 'openai-chat',
+        models: [
+            // Anthropic models via custom provider
+            { id: 'custom-' + customProvider + '/claude-opus-4-5-20251101', name: 'Claude Opus 4.5', contextWindow: 200000 },
+            { id: 'custom-' + customProvider + '/claude-sonnet-4-5-20250929', name: 'Claude Sonnet 4.5', contextWindow: 200000 },
+            { id: 'custom-' + customProvider + '/claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5', contextWindow: 200000 },
+        ]
+    };
+
+    // Include provider API key if set (for Authorization header)
+    if (process.env.OPENAI_API_KEY) {
+        providerConfig.apiKey = process.env.OPENAI_API_KEY;
+    }
+
+    // Add cf-aig-authorization header if gateway key is set
+    if (process.env.CF_AIG_AUTHORIZATION) {
+        providerConfig.headers = {
+            'cf-aig-authorization': 'Bearer ' + process.env.CF_AIG_AUTHORIZATION
+        };
+    }
+
+    config.models.providers.openai = providerConfig;
+
+    // Add models to allowlist
+    config.agents.defaults.models = config.agents.defaults.models || {};
+    const prefix = 'openai/custom-' + customProvider;
+    config.agents.defaults.models[prefix + '/claude-opus-4-5-20251101'] = { alias: 'Opus 4.5' };
+    config.agents.defaults.models[prefix + '/claude-sonnet-4-5-20250929'] = { alias: 'Sonnet 4.5' };
+    config.agents.defaults.models[prefix + '/claude-haiku-4-5-20251001'] = { alias: 'Haiku 4.5' };
+    config.agents.defaults.model.primary = prefix + '/claude-opus-4-5-20251101';
+} else if (isOpenAI) {
     // Create custom openai provider config with baseUrl override
     // Omit apiKey so moltbot falls back to OPENAI_API_KEY env var
     console.log('Configuring OpenAI provider with base URL:', baseUrl);

@@ -8,8 +8,10 @@ export interface MoltbotEnv {
   ASSETS: Fetcher; // Assets binding for admin UI static files
   MOLTBOT_BUCKET: R2Bucket; // R2 bucket for persistent storage
   // AI Gateway configuration (preferred)
-  AI_GATEWAY_API_KEY?: string; // API key for the provider configured in AI Gateway
-  AI_GATEWAY_BASE_URL?: string; // AI Gateway URL (e.g., https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic)
+  AI_GATEWAY_API_KEY?: string; // API key for the provider configured in AI Gateway (or gateway auth key for custom provider)
+  AI_GATEWAY_BASE_URL?: string; // AI Gateway URL (e.g., https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic or /compat)
+  AI_GATEWAY_PROVIDER_API_KEY?: string; // Provider API key for custom provider mode (Authorization header)
+  AI_GATEWAY_CUSTOM_PROVIDER?: string; // Custom provider name for compat mode (e.g., "cliproxyapi-anthropic")
   // Legacy direct provider configuration (fallback)
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_BASE_URL?: string;

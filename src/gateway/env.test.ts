@@ -37,6 +37,50 @@ describe('buildEnvVars', () => {
     expect(result.ANTHROPIC_API_KEY).toBeUndefined();
   });
 
+  it('maps custom provider vars for /compat gateway', () => {
+    const env = createMockEnv({
+      AI_GATEWAY_API_KEY: 'gateway-auth-key',
+      AI_GATEWAY_PROVIDER_API_KEY: 'provider-api-key',
+      AI_GATEWAY_CUSTOM_PROVIDER: 'cliproxyapi-anthropic',
+      AI_GATEWAY_BASE_URL: 'https://gateway.ai.cloudflare.com/v1/123/my-gw/compat',
+    });
+    const result = buildEnvVars(env);
+    expect(result.OPENAI_API_KEY).toBe('provider-api-key');
+    expect(result.CF_AIG_AUTHORIZATION).toBe('gateway-auth-key');
+    expect(result.AI_GATEWAY_CUSTOM_PROVIDER).toBe('cliproxyapi-anthropic');
+    expect(result.OPENAI_BASE_URL).toBe('https://gateway.ai.cloudflare.com/v1/123/my-gw/compat');
+    expect(result.AI_GATEWAY_BASE_URL).toBe('https://gateway.ai.cloudflare.com/v1/123/my-gw/compat');
+    expect(result.ANTHROPIC_API_KEY).toBeUndefined();
+  });
+
+  it('compat gateway takes precedence over direct provider keys', () => {
+    const env = createMockEnv({
+      AI_GATEWAY_API_KEY: 'gateway-auth-key',
+      AI_GATEWAY_PROVIDER_API_KEY: 'provider-api-key',
+      AI_GATEWAY_CUSTOM_PROVIDER: 'cliproxyapi-anthropic',
+      AI_GATEWAY_BASE_URL: 'https://gateway.ai.cloudflare.com/v1/123/my-gw/compat',
+      ANTHROPIC_API_KEY: 'direct-anthropic-key',
+      OPENAI_API_KEY: 'direct-openai-key',
+    });
+    const result = buildEnvVars(env);
+    // Compat provider API key takes precedence
+    expect(result.OPENAI_API_KEY).toBe('provider-api-key');
+    expect(result.CF_AIG_AUTHORIZATION).toBe('gateway-auth-key');
+    // Direct anthropic key is still passed through as fallback
+    expect(result.ANTHROPIC_API_KEY).toBe('direct-anthropic-key');
+  });
+
+  it('handles compat gateway without optional vars', () => {
+    const env = createMockEnv({
+      AI_GATEWAY_BASE_URL: 'https://gateway.ai.cloudflare.com/v1/123/my-gw/compat',
+    });
+    const result = buildEnvVars(env);
+    expect(result.AI_GATEWAY_BASE_URL).toBe('https://gateway.ai.cloudflare.com/v1/123/my-gw/compat');
+    expect(result.OPENAI_BASE_URL).toBe('https://gateway.ai.cloudflare.com/v1/123/my-gw/compat');
+    expect(result.CF_AIG_AUTHORIZATION).toBeUndefined();
+    expect(result.AI_GATEWAY_CUSTOM_PROVIDER).toBeUndefined();
+  });
+
   it('passes AI_GATEWAY_BASE_URL directly', () => {
     const env = createMockEnv({
       AI_GATEWAY_BASE_URL: 'https://gateway.ai.cloudflare.com/v1/123/my-gw/anthropic',
