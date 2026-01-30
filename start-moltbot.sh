@@ -237,7 +237,7 @@ if (isCompat && !customProvider) {
 
     const providerConfig = {
         baseUrl: baseUrl,
-        api: 'openai-responses',
+        api: 'openai-completions',
         models: [
             // Anthropic models via custom provider
             { id: 'custom-' + customProvider + '/claude-opus-4-5-20251101', name: 'Claude Opus 4.5', contextWindow: 200000 },
