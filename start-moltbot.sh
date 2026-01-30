@@ -262,6 +262,18 @@ if (isCompat && !customProvider) {
 
     // Add models to allowlist
     config.agents.defaults.models = config.agents.defaults.models || {};
+
+    // Prune stale model entries from previous runs (e.g., entries with whitespace or old custom provider names)
+    // This prevents old bad entries from persisting after R2 restore
+    const modelKeys = Object.keys(config.agents.defaults.models);
+    for (const key of modelKeys) {
+        // Remove entries with whitespace in the key (indicates old buggy config)
+        // Remove entries matching openai/custom-* pattern (we'll add the correct ones below)
+        if (key.includes('  ') || key.startsWith('openai/custom-')) {
+            delete config.agents.defaults.models[key];
+        }
+    }
+
     const prefix = 'openai/custom-' + customProvider;
     config.agents.defaults.models[prefix + '/claude-opus-4-5-20251101'] = { alias: 'Opus 4.5' };
     config.agents.defaults.models[prefix + '/claude-sonnet-4-5-20250929'] = { alias: 'Sonnet 4.5' };
