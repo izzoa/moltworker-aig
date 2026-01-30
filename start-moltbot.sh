@@ -213,12 +213,15 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/openai
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat (custom provider)
-const baseUrl = process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '';
+// Trim whitespace from env vars (users often accidentally include spaces when pasting)
+const baseUrl = (process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '').trim();
 // Normalize URL for suffix detection (handle trailing slashes)
 const normalizedUrl = baseUrl.replace(/\/+$/, '');
 const isCompat = normalizedUrl.endsWith('/compat');
 const isOpenAI = normalizedUrl.endsWith('/openai');
-const customProvider = process.env.AI_GATEWAY_CUSTOM_PROVIDER || '';
+const customProvider = (process.env.AI_GATEWAY_CUSTOM_PROVIDER || '').trim();
+const openaiApiKey = (process.env.OPENAI_API_KEY || '').trim();
+const cfAigAuth = (process.env.CF_AIG_AUTHORIZATION || '').trim();
 
 if (isCompat && customProvider) {
     // Custom provider using Cloudflare AI Gateway compat endpoint
@@ -239,14 +242,14 @@ if (isCompat && customProvider) {
     };
 
     // Include provider API key if set (for Authorization header)
-    if (process.env.OPENAI_API_KEY) {
-        providerConfig.apiKey = process.env.OPENAI_API_KEY;
+    if (openaiApiKey) {
+        providerConfig.apiKey = openaiApiKey;
     }
 
     // Add cf-aig-authorization header if gateway key is set
-    if (process.env.CF_AIG_AUTHORIZATION) {
+    if (cfAigAuth) {
         providerConfig.headers = {
-            'cf-aig-authorization': 'Bearer ' + process.env.CF_AIG_AUTHORIZATION
+            'cf-aig-authorization': 'Bearer ' + cfAigAuth
         };
     }
 
@@ -294,8 +297,9 @@ if (isCompat && customProvider) {
         ]
     };
     // Include API key in provider config if set (required when using custom baseUrl)
-    if (process.env.ANTHROPIC_API_KEY) {
-        providerConfig.apiKey = process.env.ANTHROPIC_API_KEY;
+    const anthropicApiKey = (process.env.ANTHROPIC_API_KEY || '').trim();
+    if (anthropicApiKey) {
+        providerConfig.apiKey = anthropicApiKey;
     }
     config.models.providers.anthropic = providerConfig;
     // Add models to the allowlist so they appear in /models
