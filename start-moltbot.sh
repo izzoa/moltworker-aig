@@ -213,12 +213,10 @@ if (process.env.SLACK_BOT_TOKEN && process.env.SLACK_APP_TOKEN) {
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/anthropic
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/openai
 //   https://gateway.ai.cloudflare.com/v1/{account_id}/{gateway_id}/compat (custom provider)
-// Trim whitespace from env vars (users often accidentally include spaces when pasting)
-const baseUrl = (process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '').trim();
-// Normalize URL for suffix detection (handle trailing slashes)
-const normalizedUrl = baseUrl.replace(/\/+$/, '');
-const isCompat = normalizedUrl.endsWith('/compat');
-const isOpenAI = normalizedUrl.endsWith('/openai');
+// Trim whitespace and remove trailing slashes from env vars
+const baseUrl = (process.env.AI_GATEWAY_BASE_URL || process.env.ANTHROPIC_BASE_URL || '').trim().replace(/\/+$/, '');
+const isCompat = baseUrl.endsWith('/compat');
+const isOpenAI = baseUrl.endsWith('/openai');
 const customProvider = (process.env.AI_GATEWAY_CUSTOM_PROVIDER || '').trim();
 const openaiApiKey = (process.env.OPENAI_API_KEY || '').trim();
 const cfAigAuth = (process.env.CF_AIG_AUTHORIZATION || '').trim();

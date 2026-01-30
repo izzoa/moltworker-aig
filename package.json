@@ -53,7 +53,7 @@
         "description": "Custom provider name from your AI Gateway dashboard (e.g., `cliproxyapi-anthropic`)."
       },
       "MOLTBOT_GATEWAY_TOKEN": {
-        "description": "Token to protect gateway access. Random string, you can generate one with `openssl rand -base64 32`, for example."
+        "description": "Token for gateway access. Generate with: openssl rand -hex 32"
       }
     }
   }

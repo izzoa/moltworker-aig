@@ -16,18 +16,18 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   };
 
   // Trim all input values to handle whitespace from user pasting in dashboard
-  const baseUrl = trimOrUndefined(env.AI_GATEWAY_BASE_URL);
+  // Also normalize base URL by removing trailing slashes (upstream fix)
+  const baseUrl = trimOrUndefined(env.AI_GATEWAY_BASE_URL)?.replace(/\/+$/, '');
   const gatewayApiKey = trimOrUndefined(env.AI_GATEWAY_API_KEY);
   const providerApiKey = trimOrUndefined(env.AI_GATEWAY_PROVIDER_API_KEY);
   const customProvider = trimOrUndefined(env.AI_GATEWAY_CUSTOM_PROVIDER);
   const anthropicApiKey = trimOrUndefined(env.ANTHROPIC_API_KEY);
   const openaiApiKey = trimOrUndefined(env.OPENAI_API_KEY);
-  const anthropicBaseUrl = trimOrUndefined(env.ANTHROPIC_BASE_URL);
+  const anthropicBaseUrl = trimOrUndefined(env.ANTHROPIC_BASE_URL)?.replace(/\/+$/, '');
 
-  // Normalize URL for suffix detection (handle trailing slashes)
-  const normalizedUrl = baseUrl?.replace(/\/+$/, '') || '';
-  const isCompatGateway = normalizedUrl.endsWith('/compat');
-  const isOpenAIGateway = normalizedUrl.endsWith('/openai');
+  // Detect gateway type from URL suffix
+  const isCompatGateway = baseUrl?.endsWith('/compat');
+  const isOpenAIGateway = baseUrl?.endsWith('/openai');
 
   // AI Gateway vars take precedence
   // Map to the appropriate provider env var based on the gateway endpoint
