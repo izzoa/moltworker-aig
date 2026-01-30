@@ -223,7 +223,12 @@ const customProvider = (process.env.AI_GATEWAY_CUSTOM_PROVIDER || '').trim();
 const openaiApiKey = (process.env.OPENAI_API_KEY || '').trim();
 const cfAigAuth = (process.env.CF_AIG_AUTHORIZATION || '').trim();
 
-if (isCompat && customProvider) {
+if (isCompat && !customProvider) {
+    // Error: /compat endpoint requires a custom provider name
+    console.error('ERROR: AI_GATEWAY_BASE_URL ends with /compat but AI_GATEWAY_CUSTOM_PROVIDER is not set.');
+    console.error('Custom provider mode requires AI_GATEWAY_CUSTOM_PROVIDER to be set (e.g., "cliproxyapi-anthropic").');
+    console.error('Skipping provider configuration - gateway will not work correctly.');
+} else if (isCompat && customProvider) {
     // Custom provider using Cloudflare AI Gateway compat endpoint
     // Model names: custom-{provider_name}/{model_id}
     console.log('Configuring custom provider:', customProvider, 'with base URL:', baseUrl);

@@ -9,8 +9,23 @@ import type { MoltbotEnv } from '../types';
 export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
   const envVars: Record<string, string> = {};
 
+  // Helper to trim and return undefined if empty (handles whitespace-only values)
+  const trimOrUndefined = (val: string | undefined): string | undefined => {
+    const trimmed = val?.trim();
+    return trimmed || undefined;
+  };
+
+  // Trim all input values to handle whitespace from user pasting in dashboard
+  const baseUrl = trimOrUndefined(env.AI_GATEWAY_BASE_URL);
+  const gatewayApiKey = trimOrUndefined(env.AI_GATEWAY_API_KEY);
+  const providerApiKey = trimOrUndefined(env.AI_GATEWAY_PROVIDER_API_KEY);
+  const customProvider = trimOrUndefined(env.AI_GATEWAY_CUSTOM_PROVIDER);
+  const anthropicApiKey = trimOrUndefined(env.ANTHROPIC_API_KEY);
+  const openaiApiKey = trimOrUndefined(env.OPENAI_API_KEY);
+  const anthropicBaseUrl = trimOrUndefined(env.ANTHROPIC_BASE_URL);
+
   // Normalize URL for suffix detection (handle trailing slashes)
-  const normalizedUrl = env.AI_GATEWAY_BASE_URL?.replace(/\/+$/, '') || '';
+  const normalizedUrl = baseUrl?.replace(/\/+$/, '') || '';
   const isCompatGateway = normalizedUrl.endsWith('/compat');
   const isOpenAIGateway = normalizedUrl.endsWith('/openai');
 
@@ -21,45 +36,45 @@ export function buildEnvVars(env: MoltbotEnv): Record<string, string> {
     // - AI_GATEWAY_PROVIDER_API_KEY → OPENAI_API_KEY (for Authorization header)
     // - AI_GATEWAY_API_KEY → CF_AIG_AUTHORIZATION (for cf-aig-authorization header)
     // - AI_GATEWAY_CUSTOM_PROVIDER → AI_GATEWAY_CUSTOM_PROVIDER (for model prefix)
-    if (env.AI_GATEWAY_PROVIDER_API_KEY) {
-      envVars.OPENAI_API_KEY = env.AI_GATEWAY_PROVIDER_API_KEY;
+    if (providerApiKey) {
+      envVars.OPENAI_API_KEY = providerApiKey;
     }
-    if (env.AI_GATEWAY_API_KEY) {
-      envVars.CF_AIG_AUTHORIZATION = env.AI_GATEWAY_API_KEY;
+    if (gatewayApiKey) {
+      envVars.CF_AIG_AUTHORIZATION = gatewayApiKey;
     }
-    if (env.AI_GATEWAY_CUSTOM_PROVIDER) {
-      envVars.AI_GATEWAY_CUSTOM_PROVIDER = env.AI_GATEWAY_CUSTOM_PROVIDER;
+    if (customProvider) {
+      envVars.AI_GATEWAY_CUSTOM_PROVIDER = customProvider;
     }
-  } else if (env.AI_GATEWAY_API_KEY) {
+  } else if (gatewayApiKey) {
     if (isOpenAIGateway) {
-      envVars.OPENAI_API_KEY = env.AI_GATEWAY_API_KEY;
+      envVars.OPENAI_API_KEY = gatewayApiKey;
     } else {
-      envVars.ANTHROPIC_API_KEY = env.AI_GATEWAY_API_KEY;
+      envVars.ANTHROPIC_API_KEY = gatewayApiKey;
     }
   }
 
   // Fall back to direct provider keys
-  if (!envVars.ANTHROPIC_API_KEY && env.ANTHROPIC_API_KEY) {
-    envVars.ANTHROPIC_API_KEY = env.ANTHROPIC_API_KEY;
+  if (!envVars.ANTHROPIC_API_KEY && anthropicApiKey) {
+    envVars.ANTHROPIC_API_KEY = anthropicApiKey;
   }
-  if (!envVars.OPENAI_API_KEY && env.OPENAI_API_KEY) {
-    envVars.OPENAI_API_KEY = env.OPENAI_API_KEY;
+  if (!envVars.OPENAI_API_KEY && openaiApiKey) {
+    envVars.OPENAI_API_KEY = openaiApiKey;
   }
 
   // Pass base URL (used by start-moltbot.sh to determine provider)
-  if (env.AI_GATEWAY_BASE_URL) {
-    envVars.AI_GATEWAY_BASE_URL = env.AI_GATEWAY_BASE_URL;
+  if (baseUrl) {
+    envVars.AI_GATEWAY_BASE_URL = baseUrl;
     // Also set the provider-specific base URL env var
     if (isCompatGateway) {
       // For compat mode, use OPENAI_BASE_URL since we use OpenAI-compatible API
-      envVars.OPENAI_BASE_URL = env.AI_GATEWAY_BASE_URL;
+      envVars.OPENAI_BASE_URL = baseUrl;
     } else if (isOpenAIGateway) {
-      envVars.OPENAI_BASE_URL = env.AI_GATEWAY_BASE_URL;
+      envVars.OPENAI_BASE_URL = baseUrl;
     } else {
-      envVars.ANTHROPIC_BASE_URL = env.AI_GATEWAY_BASE_URL;
+      envVars.ANTHROPIC_BASE_URL = baseUrl;
     }
-  } else if (env.ANTHROPIC_BASE_URL) {
-    envVars.ANTHROPIC_BASE_URL = env.ANTHROPIC_BASE_URL;
+  } else if (anthropicBaseUrl) {
+    envVars.ANTHROPIC_BASE_URL = anthropicBaseUrl;
   }
   // Map MOLTBOT_GATEWAY_TOKEN to CLAWDBOT_GATEWAY_TOKEN (container expects this name)
   if (env.MOLTBOT_GATEWAY_TOKEN) envVars.CLAWDBOT_GATEWAY_TOKEN = env.MOLTBOT_GATEWAY_TOKEN;
